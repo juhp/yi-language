@@ -151,11 +151,13 @@ main :-
 
 <doubledoc> {
   \" \" \"                                      { m (const Base) stringStyle }
+  \n                                            { c stringStyle }
   .                                             { c stringStyle }
 }
 
 <singledoc> {
   \' \' \'                                      { m (const Base) stringStyle }
+  \n                                            { c stringStyle }
   .                                             { c stringStyle }
 }
 
