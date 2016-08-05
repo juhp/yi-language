@@ -24,6 +24,7 @@ module Yi.Syntax
   , Cache
   , Scanner (..)
   , ExtHL        ( .. )
+  , composeHighlighters
   , noHighlighter, mkHighlighter, skipScanner, emptyFileScan
   , Point(..), Size(..), Length, Stroke
   , Span(..)
@@ -74,6 +75,16 @@ data Scanner st a = Scanner
     -- states. Note: the state is the state /before/ producing the
     -- result in the second component.
   }
+
+-- | Note that we cannot compose an arbitrary number of highlighters
+-- without losing the syntax type (which we don't want to do).
+composeHighlighters :: ExtHL s1 -> ExtHL s2 -> ExtHL (s1, s2)
+composeHighlighters (ExtHL h1) (ExtHL h2) = ExtHL $ SynHL
+    { hlStartState = (hlStartState h1, hlStartState h2)
+    , hlRun = \a b (cache1, cache2) -> (hlRun h1 a b cache1, hlRun h2 a b cache2)
+    , hlGetTree = \(cache1, cache2) a -> (hlGetTree h1 cache1 a, hlGetTree h2 cache2 a)
+    , hlFocus = \a (cache1, cache2) -> (hlFocus h1 a cache1, hlFocus h2 a cache2)
+    }
 
 skipScanner :: Int -> Scanner st a -> Scanner st a
 skipScanner n (Scanner i l e r) = Scanner i l e (other 0 . r)
